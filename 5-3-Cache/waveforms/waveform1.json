@@ -1,1 +1,13 @@
-{"signal": [{"name": "clk", "wave": "p.."}, {}, {"name": "cpu_req", "wave": "1.0"}, {"name": "cpu_ack", "wave": "010", "node": ".a."}, {"name": "cpu_write", "wave": "1.x"}, {}, {"name": "mem_req", "wave": "0..", "data": []}], "edge": ["a ack"], "head": {"text": "Waveform 1 — Write miss (clean/empty) : 2 cycle, no memory access"}, "config": {"hscale": 1}}
+{ "signal": [
+  { "name": "clk",       "wave": "p.." },
+  {},
+  { "name": "cpu_req",   "wave": "1.0" },
+  { "name": "cpu_ack",   "wave": "010", "node": ".a." },
+  { "name": "cpu_write", "wave": "1.x" },
+  {},
+  { "name": "mem_req",   "wave": "0..", "data": [] }
+],
+  "edge": ["a ack"],
+  "head": { "text": "Waveform 1 — Write miss (clean/empty) : 2 cycle, no memory access" },
+  "config": { "hscale": 2 }
+}
