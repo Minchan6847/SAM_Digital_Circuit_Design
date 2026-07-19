@@ -189,7 +189,7 @@ r_CRC[4] <= i_Data[4] ^ r_CRC[12];
 두 부분으로 나뉩니다.
 
 1. **연속 스트림:** `i_Init`으로 초기화한 뒤 `0x31, 0x32, ... 0x38` 8바이트를 연속 입력하며 CRC 누적을 관찰하고, 중간에 `i_DV`를 끊었다가 재개했을 때의 동작도 확인합니다.
-2. **참조값 검증:** `i_Init` 후 `ReverseBits(0x45)`, `ReverseBits(0x53)`(입력 비트 반사) 두 바이트를 넣고, `o_CRC_Reversed_Xor`가 **`0x5787`** 이 나오는지 확인합니다. 알려진 CRC 참조값과 대조하는 self-check입니다.
+2. **참조값(known-answer) 확인:** `i_Init` 후 `ReverseBits(0x45)`, `ReverseBits(0x53)`(입력 비트 반사) 두 바이트를 넣고, `o_CRC_Reversed_Xor`를 `$display`로 출력합니다. `"Be 0x5787 Please:"`라는 기대값 힌트와 함께 실제값을 찍어, **사람이 눈으로 `0x5787`과 대조**하는 방식입니다 (`assert` 같은 자동 pass/fail 판정은 없는 visual check). `0x45 0x53`("ES")과 `0x5787`은 알려진 참조 벡터입니다.
 
 ### 시뮬레이션 결과 (검증됨)
 
