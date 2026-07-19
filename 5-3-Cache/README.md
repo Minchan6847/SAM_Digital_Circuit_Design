@@ -343,6 +343,50 @@ wbuf_valid :  0  1  1  1  1  1  1  1  1 ...  ← 축출 라인 보관, 이후 �
 
 ---
 
+## Design Discussion — FSM으로 재작성한다면?
+
+> 아래는 구조 관점의 논의입니다. 현재 RTL은 동작에 문제가 없으며, 이 섹션은 가독성·유지보수·검증 트레이드오프를 정리한 것입니다.
+
+### 현재 구조: 상태가 암묵적으로 분산됨
+
+이 캐시는 "FSM이 없다"기보다 **명시적 state 레지스터 없이 상태가 여러 1비트 플래그로 흩어져 있는** 형태입니다. 사실상 상태 역할을 하는 신호들:
+
+- `cc_re_d` — 지금이 판정(lookup) 사이클인가
+- `mem_we_d` — 방금 write-back이 끝났나 (dead cycle인가)
+- `valid_rd`, `wb_rd` — 파이프라인 정렬된 라인 상태
+
+트랜잭션의 진행 단계(LOOKUP → WRITE_BACK → FILL → RESP)가 한눈에 드러나지 않고, `mem_no`/`mem_wb`/`mem_rd`/`mem_we_d`의 조합을 머릿속으로 시뮬레이션해야 흐름을 알 수 있습니다.
+
+### 명시적 FSM으로 얻는 것
+
+```
+IDLE → LOOKUP → (HIT           → RESP)
+                (MISS + clean  → FILL → RESP)
+                (MISS + dirty  → WRITE_BACK → WAIT → FILL → RESP)
+```
+
+- **흐름의 자기문서화:** "read miss + dirty면 write-back 먼저, 그다음 fill"이라는 순서가 state transition으로 드러납니다.
+- **트릭 제거:** `mem_we_d`로 1사이클을 죽이는 dead cycle이 `WRITE_BACK → WAIT → FILL` 상태 전이로 자연스럽게 표현됩니다. "왜 여기서 한 사이클을 막지?"가 상태 이름만으로 해소됩니다.
+- **검증·디버깅:** 파형에서 `state` 신호 하나로 현재 동작을 파악할 수 있고, state/transition 커버리지가 명확해집니다.
+- **안전한 확장:** write buffer 삽입, 다중 outstanding 요청, L2 연결 등을 상태 추가 형태로 넣을 수 있어 기존 조합 조건의 상호작용을 다시 검토할 필요가 줄어듭니다.
+
+### FSM의 단점 / 현재 방식의 장점
+
+- **지연:** 순진하게 IDLE→LOOKUP→RESP로 만들면 hit 경로가 느려질 수 있습니다. 현재는 hit을 2 cycle에 처리하는데, FSM화하면서 사이클이 늘 위험이 있습니다.
+- **코드량:** 이 정도 direct-mapped 캐시에는 state enum + next-state + output 로직의 오버헤드가 과할 수 있습니다.
+- **현재 코드의 압축:** `i_cpu_write` 하나로 read/write miss를 통합하고 `wb_mem <= i_cpu_write`로 dirty 갱신을 한 줄에 처리한 부분은 잘 짜인 지점이며, FSM으로 풀면 오히려 여러 상태로 흩어져 장황해질 수 있습니다.
+
+### 종합: 하이브리드 (빠른 hit + miss FSM)
+
+완전 FSM보다 **hit은 조합 경로, miss는 명시적 FSM**으로 두는 하이브리드가 이 캐시에 가장 어울립니다.
+
+- **hit / clean write miss** → 현재처럼 조합 경로로 1 cycle (성능 유지)
+- **miss / write-back / fill** → 명시적 FSM(`LOOKUP → WB → WAIT → FILL → RESP`)으로 순서와 dead cycle을 상태로 표현
+
+이러면 성능을 지키면서 miss 처리 흐름의 가독성·검증성을 확보할 수 있고, 특히 `mem_we_d` dead cycle처럼 주석 없이는 의도를 알기 어려운 트릭이 상태 이름으로 self-documenting 됩니다.
+
+---
+
 ## Dependencies
 
 - `tpsram` — 1-write / 1-read 포트 SRAM 모델 (`DEPTH`, `WIDTH` 파라미터화). tag SRAM은 `4 x 4b`, data SRAM은 `4 x 32b`로 인스턴스화됩니다.
