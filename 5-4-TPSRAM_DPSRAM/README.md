@@ -131,10 +131,10 @@ always @(posedge clk)
 
 | 프로세스 | 대상 | 동작 |
 |---|---|---|
-| `tpsram_write` | TPSRAM | `mem[i] = 0x10+i` 순차 기록 (i=0..7 → 0x10~0x17) |
+| `tpsram_write` | TPSRAM | `mem[i] = 0x10+i` 순차 기록 (i=0..7 → `0x10~0x17`) |
 | `tpsram_read` | TPSRAM | 2 사이클 뒤 `ra=0..7` 순차 읽기 (쓰기와 동시 진행) |
-| `dpsram_port_a` | DPSRAM 포트 A | 하위 절반(0~3)에 `0x20+i` 쓰고, 이후 상위 절반(4~7)을 읽기 |
-| `dpsram_port_b` | DPSRAM 포트 B | 상위 절반(4~7)에 `0x30+i` 쓰고, 이후 하위 절반(0~3)을 읽기 |
+| `dpsram_port_a` | DPSRAM 포트 A | 하위 절반(`0~3`)에 `0x20+i` 쓰고, 이후 상위 절반(`4~7`)을 읽기 |
+| `dpsram_port_b` | DPSRAM 포트 B | 상위 절반(`4~7`)에 `0x30+i` 쓰고, 이후 하위 절반(`0~3`)을 읽기 |
 
 ### 검증 포인트
 
