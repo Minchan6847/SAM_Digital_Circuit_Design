@@ -37,9 +37,29 @@ add  r4, r3, r0   ← 거리 1
 
 ## Pipeline Overview
 
-![Datapath with Hazard Handling](cpu_datapath_detailed.html)
+![Datapath with Hazard Handling](cpu_datapath_detailed.png)
 
-전체 데이터패스입니다.
+> 원본은 [`cpu_datapath_detailed.html`](cpu_datapath_detailed.html)입니다. 브라우저로 열면 벡터라 무한히 확대해서 볼 수 있습니다. 위 PNG는 그 렌더링 결과입니다.
+
+전체 데이터패스입니다. 왼쪽부터 IF → ID → EX → MEM → WB 순으로 놓이고, 회색 세로 막대 4개가 파이프라인 레지스터(IF/ID, ID/EX, EX/MEM, MEM/WB)입니다. **배선 위의 이름은 `cpu_hazard_hedge.v`의 wire 이름과 그대로 일치**하므로 코드와 나란히 놓고 따라갈 수 있습니다. 같은 값이 레지스터를 건널 때마다 `_ID` → `_EX` → `_MEM` → `_WB`로 접미사가 바뀌는 것도 그림에서 그대로 보입니다.
+
+선의 색이 곧 역할입니다.
+
+| 색 | 경로 | 내용 |
+|---|---|---|
+| 진회색 실선 | 데이터 | 단계 간 주 데이터 흐름 |
+| 파란 점선 | 제어 | Control·Hazard_Detection·Forwarding·Branch_Detection이 만드는 신호 |
+| 주황 | forwarding | `ALUResult_MEM` / `regWriteData_WB` → EX의 `forwardA_mux`·`forwardB_mux` |
+| 황토 | 분기·점프 주소 | ID에서 계산한 `branch_addr` / `jump_addr` → IF의 `pcSrc_mux` |
+| 청록 | write-back | `regWriteData_WB` → `Reg_File` 쓰기 포트 |
+
+앞으로만 흐르는 데이터패스에서 **뒤로 되돌아가는 경로 3개**가 이 설계의 핵심이고, 색을 따로 준 이유이기도 합니다.
+
+1. **주황 (forwarding)** — MEM·WB에 있는 아직 레지스터에 안 써진 값을 EX 입력으로 우회시켜 RAW 의존 간격 제약을 없앱니다. MUX 입력 번호(`A0`/`A1`/`A2`)는 `MUX_4x1`의 포트 이름과 같아서, `ForwardA == 2'b10`이면 `A2`(MEM 결과)가 선택된다는 것을 그림에서 바로 확인할 수 있습니다.
+2. **황토 (분기·점프)** — 이전 버전과 달리 이 선이 **MEM이 아니라 ID에서 출발**합니다. 분기 페널티가 3에서 1로 줄어든 이유가 이 한 가지입니다.
+3. **청록 (write-back)** — WB 결과가 ID의 레지스터 파일 쓰기 포트로 돌아갑니다. `Reg_File` 내부의 WB→ID bypass와 짝을 이루는 경로입니다.
+
+ID 단계에 블록이 몰려 있는 것도 분기를 앞당긴 결과입니다. `inst_ID` 버스에서 `opcode[31:26]`·`Rs[25:21]`·`Rt[20:16]`·`Rd[15:11]`·`funct[5:0]`·`imm[15:0]`이 각각 갈라져 나가고, 여기에 두 소스를 비교하는 `=` 비교기, `Branch_Detection`, `Hazard_Detection`이 전부 ID에 들어갑니다. 분기 판정에 필요한 값이 아직 EX/MEM에 있으면 forwarding으로는 못 풀기 때문에, 이 경우는 `Hazard_Detection`이 stall로 처리합니다 ([Flush](#3-flush-제어-hazard) 참고).
 
 단계 흐름만 간단히 보면 다음과 같습니다.
 
@@ -556,3 +576,26 @@ store가 MEM에 도달한 순간(`MemWrite_MEM=1, ALUResult_MEM=52`) 리셋을 �
 - `Control.v`, `ALU_control.v`, `ALU.v`, `Extend.v`, `MUX_4x1.v` — 제어·연산
 - `Hazard_Detection.v`, `Forwarding.v`, `Branch_Detection.v` — hazard 처리
 - `tb_cpu_hazard_hedge.sv` — 4-phase self-checking 테스트벤치
+- `cpu_datapath_detailed.html` / `.png` — 전체 데이터패스 다이어그램
+
+---
+
+## Reference Images
+
+- `cpu_datapath_detailed.png` — 전체 데이터패스 (위 [Pipeline Overview](#pipeline-overview) 참고)
+- `cpu_hazard_hedge-netlist_schematic-1.png` ~ `-2.png` — 합성 네트리스트 schematic
+- `tb_cpu_hazard_hedge-RTL_sim-1.png` ~ `-3.png` — TB RTL 시뮬레이션 파형
+
+### Netlist Schematic
+
+![CPU netlist schematic 1](cpu_hazard_hedge-netlist_schematic-1.png)
+
+![CPU netlist schematic 2](cpu_hazard_hedge-netlist_schematic-2.png)
+
+### RTL Simulation Waveforms
+
+![RTL simulation waveform 1](tb_cpu_hazard_hedge-RTL_sim-1.png)
+
+![RTL simulation waveform 2](tb_cpu_hazard_hedge-RTL_sim-2.png)
+
+![RTL simulation waveform 3](tb_cpu_hazard_hedge-RTL_sim-3.png)
