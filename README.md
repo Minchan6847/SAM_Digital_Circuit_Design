@@ -2,7 +2,7 @@
 
 [삼코치] 디지털 회로설계 실무 : Computer Architecture 와 SoC 프로토콜 Digital IP 설계하기 - 실습
 
-Computer Architecture와 SoC 프로토콜의 핵심 Digital IP들을 직접 RTL로 설계하고 검증한 실습 모음입니다. 메모리 계층(캐시·SRAM·DRAM)부터 저장장치 데이터 무결성(CRC·ECC)까지, 각 모듈을 설계·시뮬레이션·합성하고 문서로 정리했습니다.
+Computer Architecture와 SoC 프로토콜의 핵심 Digital IP들을 직접 RTL로 설계하고 검증한 실습 모음입니다. 메모리 계층(캐시·SRAM·DRAM)과 저장장치 데이터 무결성(CRC·ECC)부터 5단계 파이프라인 CPU까지, 각 모듈을 설계·시뮬레이션·합성하고 문서로 정리했습니다.
 
 - **Tool:** Quartus-lite-20.1.0.711-windows
 - 각 폴더의 `README.md`에 동작 원리, 블록/상태 다이어그램, 파형, 검증 결과가 정리되어 있습니다.
@@ -27,6 +27,15 @@ Computer Architecture와 SoC 프로토콜의 핵심 Digital IP들을 직접 RTL�
 | [5-8-Hamming_decoder](5-8-Hamming_decoder) | Hamming (21,16) SEC 인코더/디코더. 오류 **정정**용 ECC. syndrome으로 오류 위치를 찾아 단일 비트 정정. |
 
 > **검출 → 정정 흐름:** CRC(5-7)는 오류가 있는지 *검출*만 하고, Hamming/ECC(5-8)는 한발 더 나아가 오류를 *정정*합니다. NAND flash 데이터 무결성의 두 축을 이룹니다.
+
+### 프로세서 (Processor)
+
+| 프로젝트 | 설명 |
+|---|---|
+| [5-9-cpu](5-9-cpu) | 5단계 파이프라인 MIPS CPU (hazard 미처리). IF→ID→EX→MEM→WB를 파이프라인 레지스터로 분리, 분기는 MEM에서 해결. RAW 의존 간격 4칸과 분기 뒤 NOP 3개를 프로그램이 직접 확보해야 함. |
+| [5-10-cpu_hazard_hedge](5-10-cpu_hazard_hedge) | 위 CPU에 hazard 처리를 추가한 버전. Forwarding unit + Hazard detection(load-use stall) + IF flush를 구현하고, 분기를 ID로 앞당겨 페널티를 3에서 1로 축소. `or`/`slt`/`bne`/`j` 명령 추가. |
+
+> **미처리 → 처리 흐름:** 5-9는 hazard를 소프트웨어가 회피하고(의존 명령 4칸 간격, NOP 패딩), 5-10은 하드웨어가 forwarding·stall·flush로 직접 해결합니다. 두 버전을 나란히 보면 각 hazard 로직이 어떤 제약을 없애주는지 드러납니다.
 
 ---
 
