@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>cpu_hazard_hedge — 전체 데이터패스</title>
+<style>
+body { font-family: "Helvetica Neue", Arial, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; background: #FAF9F5; color: #2c2c2a; margin: 0; padding: 24px; }
+h1 { font-size: 20px; font-weight: 600; margin: 0 0 4px; }
+p.sub { font-size: 13px; color: #5f5e5a; margin: 0 0 16px; }
+.wrap { overflow-x: auto; background: #ffffff; border: 1px solid #d3d1c7; border-radius: 12px; padding: 12px; }
+svg { display: block; min-width: 1800px; }
+.legend { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 14px; font-size: 13px; color: #444441; align-items: center; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { display: inline-block; width: 28px; height: 0; border-top: 2.5px solid; }
+.dash { border-top-style: dashed; }
+text { font-family: inherit; }
+.t14 { font-size: 14px; font-weight: 600; }
+.t12 { font-size: 12px; }
+.t11 { font-size: 11px; }
+.t9 { font-size: 9.5px; }
+.lb { paint-order: stroke; stroke: #ffffff; stroke-width: 3.5px; stroke-linejoin: round; }
+</style>
+</head>
+<body>
+<h1>cpu_hazard_hedge — 5단계 파이프라인 전체 데이터패스</h1>
+<p class="sub">모든 배선을 코드의 wire 이름·비트 필드로 표기 · 가로로 스크롤하여 전체를 볼 수 있습니다</p>
+<div class="wrap">
+<svg viewBox="0 0 1800 800" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="CPU 전체 데이터패스 다이어그램">
+<defs>
+<marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+<path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+</marker>
+</defs>
+
+<text class="t14" x="170" y="26" text-anchor="middle" fill="#2c2c2a">IF</text>
+<text class="t14" x="600" y="26" text-anchor="middle" fill="#2c2c2a">ID</text>
+<text class="t14" x="1050" y="26" text-anchor="middle" fill="#2c2c2a">EX</text>
+<text class="t14" x="1345" y="26" text-anchor="middle" fill="#2c2c2a">MEM</text>
+<text class="t14" x="1655" y="26" text-anchor="middle" fill="#2c2c2a">WB</text>
+
+<g fill="#F1EFE8" stroke="#888780" stroke-width="1">
+<rect x="320" y="160" width="30" height="440" rx="5"/>
+<rect x="810" y="160" width="30" height="440" rx="5"/>
+<rect x="1210" y="160" width="30" height="440" rx="5"/>
+<rect x="1520" y="160" width="30" height="440" rx="5"/>
+</g>
+<text class="t12" x="335" y="618" text-anchor="middle" fill="#444441">IF/ID</text>
+<text class="t12" x="825" y="618" text-anchor="middle" fill="#444441">ID/EX</text>
+<text class="t12" x="1225" y="618" text-anchor="middle" fill="#444441">EX/MEM</text>
+<text class="t12" x="1535" y="618" text-anchor="middle" fill="#444441">MEM/WB</text>
+
+<!-- IF -->
+<g fill="#EEEDFE" stroke="#534AB7" stroke-width="1">
+<rect x="50" y="250" width="42" height="100" rx="5"/>
+<rect x="220" y="178" width="60" height="44" rx="5"/>
+</g>
+<text class="t11" x="71" y="304" text-anchor="middle" fill="#3C3489">MUX</text>
+<text class="t14" x="250" y="204" text-anchor="middle" fill="#3C3489">+4</text>
+<g fill="#E1F5EE" stroke="#0F6E56" stroke-width="1">
+<rect x="120" y="278" width="60" height="44" rx="5"/>
+<rect x="210" y="370" width="100" height="64" rx="5"/>
+</g>
+<text class="t14" x="150" y="304" text-anchor="middle" fill="#085041">PC</text>
+<text class="t14" x="260" y="390" text-anchor="middle" fill="#085041">Inst mem</text>
+<text class="t9 lb" x="304" y="404" text-anchor="end" fill="#0F6E56">inst_IF</text>
+
+<g stroke="#4a4a45" stroke-width="1.4" fill="none">
+<line x1="92" y1="300" x2="120" y2="300" marker-end="url(#ah)"/>
+<line x1="180" y1="302" x2="195" y2="302"/>
+<path d="M195 200 L195 400 M195 200 L220 200" marker-end="url(#ah)"/>
+<path d="M195 400 L210 400" marker-end="url(#ah)"/>
+<path d="M280 200 L320 200" marker-end="url(#ah)"/>
+<path d="M300 200 L300 60 L40 60 L40 270 L50 270" marker-end="url(#ah)"/>
+<path d="M310 400 L320 400" marker-end="url(#ah)"/>
+</g>
+<circle cx="195" cy="302" r="2.5" fill="#4a4a45"/>
+<circle cx="300" cy="200" r="2.5" fill="#4a4a45"/>
+
+<!-- ID boxes -->
+<g fill="#FBEAF0" stroke="#993556" stroke-width="1">
+<rect x="540" y="126" width="130" height="52" rx="5"/>
+<rect x="710" y="56" width="180" height="56" rx="5"/>
+<rect x="590" y="650" width="170" height="56" rx="5"/>
+</g>
+<text class="t14" x="605" y="148" text-anchor="middle" fill="#72243E">Control</text>
+<text class="t11" x="605" y="167" text-anchor="middle" fill="#993556">opcode·funct 해석</text>
+<text class="t14" x="800" y="80" text-anchor="middle" fill="#72243E">Hazard detection</text>
+<text class="t11" x="800" y="99" text-anchor="middle" fill="#993556">lw-use·분기 스톨</text>
+<text class="t14" x="675" y="674" text-anchor="middle" fill="#72243E">Branch detection</text>
+<text class="t11" x="675" y="693" text-anchor="middle" fill="#993556">isBranch·IF_Flush 판정</text>
+
+<g fill="#E1F5EE" stroke="#0F6E56" stroke-width="1">
+<rect x="550" y="250" width="170" height="120" rx="5"/>
+</g>
+<text class="t14" x="635" y="300" text-anchor="middle" fill="#085041">Reg file</text>
+<text class="t11" x="635" y="320" text-anchor="middle" fill="#0F6E56">레지스터 파일</text>
+
+<g fill="#EEEDFE" stroke="#534AB7" stroke-width="1">
+<rect x="550" y="440" width="130" height="48" rx="5"/>
+<rect x="550" y="520" width="170" height="42" rx="5"/>
+<rect x="550" y="590" width="160" height="44" rx="5"/>
+<rect x="746" y="390" width="50" height="36" rx="5"/>
+</g>
+<text class="t14" x="615" y="459" text-anchor="middle" fill="#3C3489">Extend</text>
+<text class="t11" x="615" y="477" text-anchor="middle" fill="#534AB7">opcode별 부호 확장</text>
+<text class="t14" x="635" y="537" text-anchor="middle" fill="#3C3489">Jump addr</text>
+<text class="t11" x="635" y="554" text-anchor="middle" fill="#534AB7">{pc, inst&lt;&lt;2}</text>
+<text class="t14" x="630" y="607" text-anchor="middle" fill="#3C3489">Branch addr</text>
+<text class="t11" x="630" y="625" text-anchor="middle" fill="#534AB7">pc+4 + (imm&lt;&lt;2)</text>
+<text class="t14" x="771" y="410" text-anchor="middle" fill="#3C3489">=</text>
+
+<!-- inst bus + field taps -->
+<g stroke="#4a4a45" stroke-width="1.4" fill="none">
+<path d="M350 340 L378 340"/>
+<path d="M378 84 L378 530"/>
+<path d="M378 130 L540 130" marker-end="url(#ah)"/>
+<path d="M378 290 L550 290" marker-end="url(#ah)"/>
+<path d="M378 320 L550 320" marker-end="url(#ah)"/>
+<path d="M378 464 L550 464" marker-end="url(#ah)"/>
+<path d="M378 530 L550 530" marker-end="url(#ah)"/>
+<path d="M378 502 L810 502" marker-end="url(#ah)"/>
+</g>
+<circle cx="378" cy="340" r="2.5" fill="#4a4a45"/>
+<circle cx="378" cy="130" r="2.2" fill="#4a4a45"/>
+<circle cx="378" cy="290" r="2.2" fill="#4a4a45"/>
+<circle cx="378" cy="320" r="2.2" fill="#4a4a45"/>
+<circle cx="378" cy="464" r="2.2" fill="#4a4a45"/>
+<circle cx="378" cy="502" r="2.2" fill="#4a4a45"/>
+
+<g stroke="#4a4a45" stroke-width="1.4" fill="none">
+<path d="M350 575 L610 575"/>
+<path d="M600 575 L600 562" marker-end="url(#ah)"/>
+<path d="M570 575 L570 590" marker-end="url(#ah)"/>
+</g>
+<circle cx="600" cy="575" r="2.2" fill="#4a4a45"/>
+<circle cx="570" cy="575" r="2.2" fill="#4a4a45"/>
+
+<g stroke="#4a4a45" stroke-width="1.4" fill="none">
+<path d="M720 285 L810 285" marker-end="url(#ah)"/>
+<path d="M720 330 L810 330" marker-end="url(#ah)"/>
+<path d="M758 285 L758 390" marker-end="url(#ah)"/>
+<path d="M784 330 L784 390" marker-end="url(#ah)"/>
+<path d="M680 464 L810 464" marker-end="url(#ah)"/>
+<path d="M800 464 L800 605 L710 605" marker-end="url(#ah)"/>
+</g>
+<circle cx="758" cy="285" r="2.2" fill="#4a4a45"/>
+<circle cx="784" cy="330" r="2.2" fill="#4a4a45"/>
+<circle cx="800" cy="464" r="2.2" fill="#4a4a45"/>
+
+<g stroke="#B07C10" stroke-width="1.6" fill="none">
+<path d="M580 634 L580 734 L26 734 L26 330 L50 330" marker-end="url(#ah)"/>
+<path d="M720 541 L768 541 L768 746 L16 746 L16 300 L50 300" marker-end="url(#ah)"/>
+</g>
+
+<!-- EX -->
+<g fill="#EEEDFE" stroke="#534AB7" stroke-width="1">
+<rect x="920" y="255" width="36" height="80" rx="5"/>
+<rect x="920" y="355" width="36" height="80" rx="5"/>
+<rect x="988" y="370" width="36" height="70" rx="5"/>
+<rect x="950" y="490" width="36" height="64" rx="5"/>
+<rect x="1040" y="270" width="70" height="160" rx="5"/>
+<rect x="1040" y="540" width="140" height="48" rx="5"/>
+</g>
+<text class="t11" x="938" y="298" text-anchor="middle" fill="#3C3489">MUX</text>
+<text class="t11" x="938" y="398" text-anchor="middle" fill="#3C3489">MUX</text>
+<text class="t11" x="1006" y="408" text-anchor="middle" fill="#3C3489">MUX</text>
+<text class="t11" x="968" y="525" text-anchor="middle" fill="#3C3489">MUX</text>
+<text class="t14" x="1075" y="354" text-anchor="middle" fill="#3C3489">ALU</text>
+<text class="t14" x="1110" y="559" text-anchor="middle" fill="#3C3489">ALU control</text>
+<text class="t11" x="1110" y="577" text-anchor="middle" fill="#534AB7">ALUOp + funct</text>
+
+<g stroke="#4a4a45" stroke-width="1.4" fill="none">
+<path d="M840 285 L920 285" marker-end="url(#ah)"/>
+<path d="M840 330 L846 330 L846 395 L920 395" marker-end="url(#ah)"/>
+<path d="M956 295 L1040 295" marker-end="url(#ah)"/>
+<path d="M956 395 L988 395" marker-end="url(#ah)"/>
+<path d="M840 464 L976 464 L976 425 L988 425" marker-end="url(#ah)"/>
+<path d="M1024 405 L1040 405" marker-end="url(#ah)"/>
+<path d="M970 395 L970 480 L1210 480" marker-end="url(#ah)"/>
+<path d="M1110 350 L1210 350" marker-end="url(#ah)"/>
+<path d="M840 502 L950 502" marker-end="url(#ah)"/>
+<path d="M922 502 L922 528 L950 528" marker-end="url(#ah)"/>
+<path d="M986 522 L1210 522" marker-end="url(#ah)"/>
+<path d="M930 464 L930 560 L1040 560" marker-end="url(#ah)"/>
+</g>
+<circle cx="970" cy="395" r="2.5" fill="#4a4a45"/>
+<circle cx="922" cy="502" r="2.2" fill="#4a4a45"/>
+<circle cx="930" cy="464" r="2.2" fill="#4a4a45"/>
+
+<!-- MEM -->
+<g fill="#E1F5EE" stroke="#0F6E56" stroke-width="1">
+<rect x="1270" y="300" width="150" height="110" rx="5"/>
+</g>
+<text class="t14" x="1345" y="348" text-anchor="middle" fill="#085041">Data mem</text>
+<text class="t11" x="1345" y="368" text-anchor="middle" fill="#0F6E56">데이터 메모리</text>
+
+<g stroke="#4a4a45" stroke-width="1.4" fill="none">
+<path d="M1240 350 L1270 350" marker-end="url(#ah)"/>
+<path d="M1252 350 L1252 470 L1520 470" marker-end="url(#ah)"/>
+<path d="M1240 480 L1256 480 L1256 385 L1270 385" marker-end="url(#ah)"/>
+<path d="M1420 340 L1520 340" marker-end="url(#ah)"/>
+<path d="M1240 522 L1520 522" marker-end="url(#ah)"/>
+</g>
+<circle cx="1252" cy="350" r="2.5" fill="#4a4a45"/>
+
+<!-- WB -->
+<g fill="#EEEDFE" stroke="#534AB7" stroke-width="1">
+<rect x="1660" y="280" width="50" height="90" rx="5"/>
+</g>
+<text class="t11" x="1685" y="329" text-anchor="middle" fill="#3C3489">MUX</text>
+<g stroke="#4a4a45" stroke-width="1.4" fill="none">
+<path d="M1550 340 L1660 340" marker-end="url(#ah)"/>
+<path d="M1550 470 L1640 470 L1640 355 L1660 355" marker-end="url(#ah)"/>
+</g>
+
+<path d="M1710 325 L1730 325 L1730 762 L539 762 L539 355 L550 355" fill="none" stroke="#0F6E56" stroke-width="1.6" marker-end="url(#ah)"/>
+<circle cx="1720" cy="325" r="2.5" fill="#0F6E56"/>
+
+<g stroke="#C9502A" stroke-width="1.6" fill="none">
+<path d="M1252 350 L1252 150 L948 150 L948 255" marker-end="url(#ah)"/>
+<path d="M1720 325 L1720 130 L932 130 L932 255" marker-end="url(#ah)"/>
+</g>
+
+<g fill="#FBEAF0" stroke="#993556" stroke-width="1">
+<rect x="1010" y="690" width="180" height="56" rx="5"/>
+</g>
+<text class="t14" x="1100" y="713" text-anchor="middle" fill="#72243E">Forwarding</text>
+<text class="t11" x="1100" y="732" text-anchor="middle" fill="#993556">ForwardA·B 선택</text>
+
+<!-- control signals -->
+<g stroke="#2F6FB5" stroke-width="1.2" stroke-dasharray="5 4" fill="none">
+<path d="M670 152 L816 152 L816 160" marker-end="url(#ah)"/>
+<path d="M828 160 L828 112" marker-end="url(#ah)"/>
+<path d="M838 112 L838 160" marker-end="url(#ah)"/>
+<path d="M378 84 L710 84" marker-end="url(#ah)"/>
+<path d="M710 70 L150 70 L150 278" marker-end="url(#ah)"/>
+<path d="M710 94 L340 94 L340 160" marker-end="url(#ah)"/>
+<path d="M655 126 L655 104 L710 104" marker-end="url(#ah)"/>
+<path d="M1218 160 L1218 88 L890 88" marker-end="url(#ah)"/>
+<path d="M570 178 L570 225 L545 225 L545 668 L590 668" marker-end="url(#ah)"/>
+<path d="M730 112 L730 650" marker-end="url(#ah)"/>
+<path d="M775 426 L775 678 L760 678" marker-end="url(#ah)"/>
+<path d="M620 650 L620 640 L335 640 L335 600" marker-end="url(#ah)"/>
+<path d="M650 706 L650 722 L70 722 L70 350" marker-end="url(#ah)"/>
+<path d="M840 168 L1210 168" marker-end="url(#ah)"/>
+<path d="M962 168 L962 490" marker-end="url(#ah)"/>
+<path d="M1010 168 L1010 370" marker-end="url(#ah)"/>
+<path d="M1170 168 L1170 540" marker-end="url(#ah)"/>
+<path d="M1070 540 L1070 430" marker-end="url(#ah)"/>
+<path d="M1240 168 L1520 168" marker-end="url(#ah)"/>
+<path d="M1340 168 L1340 300" marker-end="url(#ah)"/>
+<path d="M1550 168 L1685 168 L1685 280" marker-end="url(#ah)"/>
+<path d="M822 600 L822 718 L1010 718" marker-end="url(#ah)"/>
+<path d="M1222 600 L1222 705 L1190 705" marker-end="url(#ah)"/>
+<path d="M1532 600 L1532 730 L1190 730" marker-end="url(#ah)"/>
+<path d="M1040 690 L1040 665 L853 665 L853 345 L928 345 L928 335" marker-end="url(#ah)"/>
+<path d="M1020 690 L1020 672 L936 672 L936 435" marker-end="url(#ah)"/>
+</g>
+<circle cx="962" cy="168" r="2.2" fill="#2F6FB5"/>
+<circle cx="1010" cy="168" r="2.2" fill="#2F6FB5"/>
+<circle cx="1170" cy="168" r="2.2" fill="#2F6FB5"/>
+<circle cx="1340" cy="168" r="2.2" fill="#2F6FB5"/>
+<circle cx="378" cy="84" r="2.2" fill="#4a4a45"/>
+
+<!-- ===== signal name labels ===== -->
+<text class="t11 lb" x="184" y="294" fill="#666660">pcOut_IF</text>
+<text class="t11 lb" x="150" y="56" fill="#666660">pcAdd4_IF</text>
+<text class="t11 lb" x="384" y="230" fill="#666660">inst_ID</text>
+<text class="t11 lb" x="352" y="564" fill="#666660">pcAdd4_ID</text>
+<text class="t11 lb" x="384" y="79" fill="#666660">opcode·Rs_ID·Rt_ID</text>
+<text class="t11 lb" x="384" y="110" fill="#666660">opcode = inst_ID[31:26]</text>
+<text class="t11 lb" x="384" y="124" fill="#666660">funct_ID = inst_ID[5:0]</text>
+<text class="t11 lb" x="384" y="285" fill="#666660">Rs_ID = inst_ID[25:21]</text>
+<text class="t11 lb" x="384" y="315" fill="#666660">Rt_ID = inst_ID[20:16]</text>
+<text class="t11 lb" x="384" y="459" fill="#666660">inst_ID[15:0]</text>
+<text class="t11 lb" x="384" y="497" fill="#666660">Rd_ID = inst_ID[15:11]</text>
+<text class="t11 lb" x="384" y="525" fill="#666660">inst_ID[25:0]</text>
+<text class="t11 lb" x="384" y="350" fill="#0F6E56">regWriteData_WB · Dst_WB</text>
+<text class="t11 lb" x="726" y="277" fill="#666660">regReadData1</text>
+<text class="t11 lb" x="726" y="318" fill="#666660">regReadData2</text>
+<text class="t11 lb" x="686" y="452" fill="#666660">immExtend_ID</text>
+<text class="t11 lb" x="724" y="497" fill="#666660">Rs·Rt·Rd_ID</text>
+<text class="t11 lb" x="574" y="700" text-anchor="end" fill="#8a6008">branch_addr</text>
+<text class="t11 lb" x="752" y="586" fill="#8a6008">jump_addr</text>
+<text class="t11 lb" x="964" y="290" fill="#666660">aluInA_EX</text>
+<text class="t11 lb" x="1115" y="338" fill="#666660">ALUResult_EX</text>
+<text class="t11 lb" x="1000" y="468" fill="#666660">ForwardBOut_EX</text>
+<text class="t11 lb" x="1110" y="517" fill="#666660">Dst_EX</text>
+<text class="t11 lb" x="936" y="574" fill="#666660">immExtend_EX[5:0]</text>
+<text class="t11 lb" x="1290" y="462" fill="#666660">ALUResult_MEM</text>
+<text class="t11 lb" x="1424" y="328" fill="#666660">dmReadData_MEM</text>
+<text class="t11 lb" x="1556" y="334" fill="#666660">dmReadData_WB</text>
+<text class="t11 lb" x="1556" y="464" fill="#666660">ALUResult_WB</text>
+<text class="t11 lb" x="395" y="62" fill="#2F6FB5">PCWrite</text>
+<text class="t11 lb" x="336" y="90" text-anchor="end" fill="#2F6FB5">IFID_Write</text>
+<text class="t11 lb" x="844" y="130" fill="#2F6FB5">Hazard (버블)</text>
+<text class="t11 lb" x="551" y="242" fill="#2F6FB5">Branch·Jump</text>
+<text class="t11 lb" x="734" y="622" fill="#2F6FB5">Hazard</text>
+<text class="t11 lb" x="340" y="656" fill="#2F6FB5">IF_Flush</text>
+<text class="t11 lb" x="740" y="438" fill="#2F6FB5">equal</text>
+<text class="t11 lb" x="78" y="712" fill="#2F6FB5">{isBranch, Jump}</text>
+<text class="t11 lb" x="1555" y="158" fill="#2F6FB5">MemtoReg_WB·RegWrite_WB</text>
+<text class="t11 lb" x="1128" y="240" fill="#2F6FB5">ALUOp</text>
+<text class="t11 lb" x="1014" y="240" fill="#2F6FB5">ALUSrc</text>
+<text class="t11 lb" x="966" y="240" fill="#2F6FB5">RegDst</text>
+<text class="t11 lb" x="1346" y="240" fill="#2F6FB5">MemRead·MemWrite</text>
+<text class="t11 lb" x="1076" y="500" fill="#2F6FB5">aluControl_EX</text>
+<text class="t11 lb" x="946" y="660" fill="#2F6FB5">ForwardA</text>
+<text class="t11 lb" x="942" y="600" fill="#2F6FB5">ForwardB</text>
+<text class="t11 lb" x="910" y="714" fill="#2F6FB5">Rs_EX·Rt_EX</text>
+<text class="t11 lb" x="1228" y="660" fill="#2F6FB5">Dst_MEM</text>
+<text class="t11 lb" x="1538" y="660" fill="#2F6FB5">Dst_WB</text>
+<text class="t11 lb" x="1260" y="124" fill="#B5502C">A1: regWriteData_WB (포워딩)</text>
+<text class="t11 lb" x="1260" y="146" fill="#B5502C">A2: ALUResult_MEM (포워딩)</text>
+<text class="t11 lb" x="1260" y="754" fill="#0F6E56">regWriteData_WB · Dst_WB · RegWrite_WB (라이트백)</text>
+
+<text class="t11 lb" x="672" y="100" fill="#2F6FB5">Branch</text>
+<text class="t11 lb" x="676" y="166" fill="#2F6FB5">제어 신호 (EX·M·WB)</text>
+<text class="t11 lb" x="822" y="122" text-anchor="end" fill="#2F6FB5">MemRead_EX</text>
+<text class="t11 lb" x="822" y="135" text-anchor="end" fill="#2F6FB5">Rt_EX·Dst_EX</text>
+<text class="t11 lb" x="822" y="148" text-anchor="end" fill="#2F6FB5">RegWrite_EX</text>
+<text class="t11 lb" x="940" y="82" fill="#2F6FB5">Dst_MEM·RegWrite_MEM</text>
+<text class="t11 lb" x="852" y="162" fill="#2F6FB5">제어 번들</text>
+<text class="t11 lb" x="1244" y="162" fill="#2F6FB5">M·WB 제어</text>
+<text class="t9 lb" x="841" y="300" fill="#666660">regReadData1_EX</text>
+<text class="t9 lb" x="841" y="344" fill="#666660">regReadData2_EX</text>
+<text class="t11 lb" x="852" y="458" fill="#666660">immExtend_EX</text>
+<text class="t11 lb" x="842" y="496" fill="#666660">Rt·Rd_EX</text>
+<text class="t11 lb" x="1262" y="496" fill="#666660">ForwardBOut_MEM</text>
+<text class="t11 lb" x="1250" y="516" fill="#666660">Dst_MEM</text>
+<text class="t9 lb" x="1276" y="347" fill="#0F6E56">addr</text>
+<text class="t9 lb" x="1276" y="389" fill="#0F6E56">W_data</text>
+<text class="t9 lb" x="1414" y="337" text-anchor="end" fill="#0F6E56">R_data</text>
+<!-- mux input indices -->
+<g fill="#7a7975">
+<text class="t9 lb" x="34" y="266">A0</text>
+<text class="t9 lb" x="32" y="296">A1</text>
+<text class="t9 lb" x="32" y="326">A2</text>
+<text class="t9 lb" x="906" y="281">A0</text>
+<text class="t9 lb" x="906" y="391">A0</text>
+<text class="t9 lb" x="923" y="250">A1</text>
+<text class="t9 lb" x="939" y="250">A2</text>
+<text class="t9 lb" x="978" y="392">0</text>
+<text class="t9 lb" x="978" y="422">1</text>
+<text class="t9 lb" x="953" y="500">Rt</text>
+<text class="t9 lb" x="936" y="526">Rd</text>
+<text class="t9 lb" x="1650" y="338">1</text>
+<text class="t9 lb" x="1650" y="353">0</text>
+</g>
+</svg>
+</div>
+<div class="legend">
+<span><span class="sw" style="border-color:#4a4a45"></span>데이터 경로</span>
+<span><span class="sw dash" style="border-color:#2F6FB5"></span>제어 신호</span>
+<span><span class="sw" style="border-color:#C9502A"></span>포워딩 (MEM·WB → forwardA/B_mux)</span>
+<span><span class="sw" style="border-color:#B07C10"></span>분기·점프 주소 (ID → pcSrc_mux)</span>
+<span><span class="sw" style="border-color:#0F6E56"></span>라이트백 (WB → Reg file)</span>
+</div>
+</body>
+</html>
