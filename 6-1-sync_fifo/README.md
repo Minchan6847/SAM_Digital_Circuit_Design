@@ -2,7 +2,6 @@
 
 단일 클럭 동기식 FIFO(First-In First-Out) 버퍼입니다. 하나의 `clk`로 push(쓰기)와 pop(읽기)을 처리하며, 파라미터로 깊이·폭·almost-full/almost-empty 임계값을 조정할 수 있습니다. First-word fall-through(FWFT) 방식이라 읽을 데이터가 있으면 pop을 기다리지 않고 `dout`에 미리 나와 있습니다.
 
-- **Tool:** Quartus-lite-20.1.0.711-windows
 - 카운터 기반 occupancy 추적 + 순환(circular) 포인터 구조
 
 ---
@@ -209,12 +208,12 @@ a_empty = (count <= AE_LEVEL)
 | 검증 항목 | 해당 트랜잭션 |
 |---|---|
 | 리셋 후 초기 플래그 | 리셋 직후 |
-| 네 플래그의 상승/하강 경계 | 1~4, 7~10 |
+| 네 플래그의 상승/하강 경계 | 1–4, 7–10 |
 | full에서 push 무시 | 5 |
 | full에서 동시 push+pop (교체) | 6 |
 | empty에서 pop 무시 | 11 |
 | empty에서 동시 push+pop (push 우선) | 12 |
-| 데이터 순서 보존 (FIFO 성질) | 7~10, 20~23 |
+| 데이터 순서 보존 (FIFO 성질) | 7–10, 20–23 |
 | `wr_ptr` 랩어라운드 | 15 |
 | `rd_ptr` 랩어라운드 | 20 |
 | 행(hang) 방지 | 타임아웃 가드 |
