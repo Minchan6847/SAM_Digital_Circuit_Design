@@ -45,42 +45,7 @@
 
 ## Block Diagram
 
-```mermaid
-flowchart LR
-    subgraph WD["Write domain — wclk"]
-        direction TB
-        WF["write_fire<br/>push AND NOT full"]
-        WBIN["wbin<br/>binary 포인터"]
-        WGRAY["wgray<br/>bin2gray"]
-        SYNC2["2-flop sync<br/>rgray_meta_wclk<br/>rgray_sync_wclk"]
-        FCMP["full 비교기<br/>XOR mask"]
-        WF --> WBIN --> WGRAY
-        WGRAY --> FCMP
-        SYNC2 --> FCMP
-        FCMP --> FULL["full"]
-    end
-
-    subgraph RD["Read domain — rclk"]
-        direction TB
-        RF["read_fire<br/>pop AND NOT empty"]
-        RBIN["rbin<br/>binary 포인터"]
-        RGRAY["rgray<br/>bin2gray"]
-        SYNC1["2-flop sync<br/>wgray_meta_rclk<br/>wgray_sync_rclk"]
-        ECMP["empty 비교기<br/>동등 비교"]
-        RF --> RBIN --> RGRAY
-        RGRAY --> ECMP
-        SYNC1 --> ECMP
-        ECMP --> EMPTY["empty"]
-    end
-
-    WGRAY ==>|CDC| SYNC1
-    RGRAY ==>|CDC| SYNC2
-
-    DIN["din"] --> MEM["mem 배열<br/>DEPTH x WIDTH"]
-    WBIN -.->|write addr| MEM
-    RBIN -.->|read addr| MEM
-    MEM --> DOUT["dout"]
-```
+![async_fifo block diagram](async_fifo-block_diagram.png)
 
 동기화기는 **받는 쪽 도메인 안에** 있습니다. `wgray`를 받는 2-flop sync는 `rclk`으로, `rgray`를 받는 쪽은 `wclk`으로 동작하기 때문입니다. 그래서 도메인 경계를 실제로 건너는 것은 **굵은 화살표 두 개, 즉 Gray 포인터 두 개뿐**이고, 그 화살표는 곧바로 동기화기의 입력 플롭에 도착합니다. metastability가 발생할 수 있는 지점이 이 두 곳으로 한정된다는 뜻입니다.
 
@@ -345,3 +310,22 @@ join
 
 - `async_fifo.sv` — 비동기 FIFO RTL (Gray 포인터, 2-flop 동기화, FWFT)
 - `tb_async_fifo.sv` — self-checking 테스트벤치 (도메인별 모니터 + 백프레셔 드라이버 + 랜덤 트래픽)
+- `async_fifo-block_diagram.png` — 위 블록 다이어그램
+- `async_fifo-netlist_schematic.png` — 합성 네트리스트 schematic
+- `tb_async_fifo-RTL_sim-1.png` / `-2.png` / `-3.png` — TB RTL 시뮬레이션 파형
+
+---
+
+## Reference Images
+
+### Netlist Schematic
+
+![async_fifo netlist schematic](async_fifo-netlist_schematic.png)
+
+### RTL Simulation Waveforms
+
+![tb_async_fifo RTL simulation 1](tb_async_fifo-RTL_sim-1.png)
+
+![tb_async_fifo RTL simulation 2](tb_async_fifo-RTL_sim-2.png)
+
+![tb_async_fifo RTL simulation 3](tb_async_fifo-RTL_sim-3.png)
