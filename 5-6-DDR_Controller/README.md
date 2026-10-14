@@ -130,7 +130,7 @@ Command는 `{csn, actn, rasn, casn, wen}` 5비트 조합으로 표현됩니다. 
 | ACT | 0 | 0 | — | — | — |
 | WR | 0 | — | — | 0 | 0 |
 | RD | 0 | — | — | 0 | — |
-| PRE | 0 | — | 0 | 0 | — |
+| PRE | 0 | — | 0 | — | 0 |
 | MRS | 0 | — | 0 | 0 | 0 |
 
 Address bus `a[]`는 state에 따라 다른 내용을 실어 multiplexing합니다.
