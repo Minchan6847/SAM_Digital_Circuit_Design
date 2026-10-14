@@ -211,7 +211,7 @@ module ddr_ctrl (
                 PRE: begin
                     csn  = 0;
                     rasn = 0;
-                    casn = 0;
+                    wen = 0;
                 end
             endcase
         end else if (cnt == 1) begin
