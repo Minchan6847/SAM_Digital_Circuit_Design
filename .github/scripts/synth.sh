@@ -47,13 +47,16 @@ for top in $tops; do
     echo "::error title=$dir::Yosys synthesis failed for top '$top'"; status=1
     result="❌ fail"
   else
-    cells=$(grep -E 'Number of cells' "$stat" | tail -1 | awk '{print $NF}' || true)
+    # stat format: "Number of cells:  300" (Yosys <= 0.5x) or "300 cells" (newer)
+    cells=$(grep -E 'Number of cells|^ *[0-9]+ +cells *$' "$stat" | tail -1 | grep -oE '[0-9]+' | tail -1 || true)
     # Inferred latches (incomplete if/case in combinational always blocks) do not
     # make synthesis fail, so look for latch cells in the synthesized netlist.
     latch_cells=$(grep -cE '\$_?(DLATCH|dlatch|adlatch|dlatchsr|DLATCHSR)' "$stat" || true)
     if [ "${latch_cells:-0}" -gt 0 ]; then
       echo "Inferred latches in '$top':"
-      grep -E '\$_?(DLATCH|dlatch|adlatch|dlatchsr|DLATCHSR)' "$stat" | awk '{print "  " $1 " x" $2}' | sort -u
+      grep -E '\$_?(DLATCH|dlatch|adlatch|dlatchsr|DLATCHSR)' "$stat" \
+        | awk '{t=""; n=""; for (i=1;i<=NF;i++) { if ($i ~ /latch|LATCH/) t=$i; else if ($i ~ /^[0-9]+$/) n=$i }; print "  " t " x" n}' \
+        | sort -u
       # Signal names and source lines, as reported by the frontend / proc pass
       grep -iE 'latch' "$log" | grep -viE 'executing|extmapper|^ *[0-9.]+ |\$_?dlatch' | sort -u | head -20 | sed 's/^/  /' || true
       echo "::error title=$dir::latch inferred in '$top' (see job log for the signals)"
