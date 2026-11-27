@@ -42,10 +42,15 @@ env:
 
 처음에는 Icarus Verilog(4-state)로 시작했지만, 이 레포의 TB 중 두 개가 Icarus의 한계에 걸렸습니다.
 
-- `5-10-cpu_hazard_hedge`: Icarus 12는 `$isunknown({a, b})`처럼 concatenation을 넣으면 값과 상관없이 항상 1을 반환 → X가 없는데도 X 체크가 262번 FAIL
-- `5-7-CRC_16_CCITT_Parallel`: 함수 안의 `automatic` 변수 선언을 지원하지 않아 컴파일 실패
+- `5-10-cpu_hazard_hedge`: Icarus 12는 `$isunknown({a, b})`처럼 concatenation을 넣으면 값과 상관없이 항상 1을 반환합니다. [`tb_cpu_hazard_hedge.sv` 187–197행](../5-10-cpu_hazard_hedge/tb_cpu_hazard_hedge.sv#L187-L197)의 모니터가 `$isunknown({ut.MemRead_EX, ut.MemWrite_EX, ...})`로 제어 신호 7개를 한 번에 검사하기 때문에, X가 없는데도 이 X 체크가 262번 FAIL했습니다.
+- `5-7-CRC_16_CCITT_Parallel`: Icarus는 함수 안의 `automatic` 변수 선언을 지원하지 않습니다. [`tb_CRC_16_CCITT_Parallel.sv` 76행](../5-7-CRC_16_CCITT_Parallel/tb_CRC_16_CCITT_Parallel.sv#L76)의 `ReverseBits` 함수에 있는 `automatic logic [7:0] temp = data, ii = 0;` 때문에 테스트벤치가 컴파일되지 않았습니다.
 
-최신 Verilator에서는 10개 프로젝트가 모두 수정 없이 PASS하므로 Verilator 하나로 통일했습니다. (Ubuntu apt의 Verilator 5.020은 `5-9-cpu`의 reset `for` 루프 안 배열 non-blocking 대입을 지원하지 않고, 상수 대입 최적화 버그도 있어서 사용하지 않습니다.)
+최신 Verilator에서는 10개 프로젝트가 모두 수정 없이 PASS하므로 Verilator 하나로 통일했습니다.
+
+Ubuntu apt의 Verilator 5.020은 어떤 옵션으로도 10개를 한 번에 통과시킬 수 없어서 사용하지 않습니다.
+
+- 기본 최적화에서는 `initial` 블록에서도 쓰는 변수에 대한 상수 대입이 사라지는 버그가 있습니다. 그래서 `5-10-cpu_hazard_hedge`의 coverage 플래그(예: [`tb_cpu_hazard_hedge.sv` 203행](../5-10-cpu_hazard_hedge/tb_cpu_hazard_hedge.sv#L203)의 `saw_mem_forward = 1'b1`)가 1이 되지 않고, coverage 체크 14개가 FAIL합니다.
+- `-O0`로 최적화를 끄면 이 버그는 피하지만, 이번에는 `5-9-cpu`를 `BLKLOOPINIT`("Delayed assignment to array inside for loops") 에러로 거부합니다. 원인은 [`DataMem.sv` 17–19행](../5-9-cpu/DataMem.sv#L17-L19)의 reset 루프로, `for (int i = 0; i < 128; i++) mem[i] <= 32'd0;`로 메모리를 초기화하는 부분입니다.
 
 ## 시뮬레이션 (`sim.sh`)
 

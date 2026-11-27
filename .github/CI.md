@@ -42,10 +42,15 @@ To update the tools, pick a date from the [release list](https://github.com/Yosy
 
 The CI started with Icarus Verilog (4-state), but two testbenches in this repository hit Icarus limitations:
 
-- `5-10-cpu_hazard_hedge`: Icarus 12 returns 1 for `$isunknown` on a concatenation such as `{a, b}` regardless of the values, so the X check failed 262 times even though no signal was X.
-- `5-7-CRC_16_CCITT_Parallel`: Icarus does not support `automatic` variable declarations inside functions, so the testbench did not compile.
+- `5-10-cpu_hazard_hedge`: Icarus 12 returns 1 for `$isunknown` on a concatenation such as `{a, b}` regardless of the values. The monitor in [`tb_cpu_hazard_hedge.sv` lines 187–197](../5-10-cpu_hazard_hedge/tb_cpu_hazard_hedge.sv#L187-L197) checks seven control signals at once with `$isunknown({ut.MemRead_EX, ut.MemWrite_EX, ...})`, so this X check failed 262 times even though no signal was X.
+- `5-7-CRC_16_CCITT_Parallel`: Icarus does not support `automatic` variable declarations inside functions. The `ReverseBits` function declares `automatic logic [7:0] temp = data, ii = 0;` in [`tb_CRC_16_CCITT_Parallel.sv` line 76](../5-7-CRC_16_CCITT_Parallel/tb_CRC_16_CCITT_Parallel.sv#L76), so the testbench did not compile.
 
-All 10 projects pass on a recent Verilator without changes, so the CI uses Verilator only. (Verilator 5.020 from Ubuntu apt is not used: it rejects the non-blocking array assignment inside the reset `for` loop in `5-9-cpu`, and it has an optimization bug that drops constant assignments.)
+All 10 projects pass on a recent Verilator without changes, so the CI uses Verilator only.
+
+Verilator 5.020 from Ubuntu apt is not used, because no single set of options passes all 10 projects with it:
+
+- With default optimization, Verilator 5.020 drops constant writes to a variable that is also written from an `initial` block. The coverage flags in `5-10-cpu_hazard_hedge`, such as `saw_mem_forward = 1'b1` in [`tb_cpu_hazard_hedge.sv` line 203](../5-10-cpu_hazard_hedge/tb_cpu_hazard_hedge.sv#L203), therefore never become 1, and 14 coverage checks fail.
+- With `-O0`, that bug goes away, but Verilator 5.020 rejects `5-9-cpu` with `BLKLOOPINIT` ("Delayed assignment to array inside for loops"). The cause is the reset loop in [`DataMem.sv` lines 17–19](../5-9-cpu/DataMem.sv#L17-L19), which clears memory with `for (int i = 0; i < 128; i++) mem[i] <= 32'd0;`.
 
 ## Simulation (`sim.sh`)
 
