@@ -50,7 +50,7 @@ env:
 Ubuntu apt의 Verilator 5.020은 어떤 옵션으로도 10개를 한 번에 통과시킬 수 없어서 사용하지 않습니다.
 
 - 기본 최적화에서는 `initial` 블록에서도 쓰는 변수에 대한 상수 대입이 사라지는 버그가 있습니다. 그래서 `5-10-cpu_hazard_hedge`의 coverage 플래그(예: [`tb_cpu_hazard_hedge.sv` 203행](../5-10-cpu_hazard_hedge/tb_cpu_hazard_hedge.sv#L203)의 `saw_mem_forward = 1'b1`)가 1이 되지 않고, coverage 체크 14개가 FAIL합니다.
-- `-O0`로 최적화를 끄면 이 버그는 피하지만, 이번에는 `5-9-cpu`를 `BLKLOOPINIT`("Delayed assignment to array inside for loops") 에러로 거부합니다. 원인은 [`DataMem.sv` 17–19행](../5-9-cpu/DataMem.sv#L17-L19)의 reset 루프로, `for (int i = 0; i < 128; i++) mem[i] <= 32'd0;`로 메모리를 초기화하는 부분입니다.
+- `-O0`로 최적화를 끄면 이 버그는 피하지만, 이번에는 `5-9-cpu`를 `BLKLOOPINIT`("Delayed assignment to array inside for loops") 에러로 거부합니다. 원인은 [`DataMem.sv` 17–19행](../5-9-cpu/DataMem.sv#L17-L19)의 reset 루프로, `for (int i = 0; i < 128; i++) mem[i] <= 32'd0;`로 메모리를 초기화하는 부분입니다. 여기서 "delayed assignment"는 Verilator가 non-blocking 대입(`<=`)을 부르는 이름으로, 값 업데이트가 NBA region으로 미뤄지기 때문에 이렇게 부릅니다. 같은 루프라도 blocking 대입(`=`)이면 받아들입니다. 기본 최적화에서는 Verilator가 루프를 먼저 개별 대입으로 풀어(unroll) 버리기 때문에 이 제약이 드러나지 않습니다. RTL에는 문제가 없으며, 클럭 `always` 블록에서 `<=`를 쓰는 지금 방식이 올바른 코딩 스타일입니다.
 
 ## 시뮬레이션 (`sim.sh`)
 

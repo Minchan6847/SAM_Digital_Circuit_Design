@@ -50,7 +50,7 @@ All 10 projects pass on a recent Verilator without changes, so the CI uses Veril
 Verilator 5.020 from Ubuntu apt is not used, because no single set of options passes all 10 projects with it:
 
 - With default optimization, Verilator 5.020 drops constant writes to a variable that is also written from an `initial` block. The coverage flags in `5-10-cpu_hazard_hedge`, such as `saw_mem_forward = 1'b1` in [`tb_cpu_hazard_hedge.sv` line 203](../5-10-cpu_hazard_hedge/tb_cpu_hazard_hedge.sv#L203), therefore never become 1, and 14 coverage checks fail.
-- With `-O0`, that bug goes away, but Verilator 5.020 rejects `5-9-cpu` with `BLKLOOPINIT` ("Delayed assignment to array inside for loops"). The cause is the reset loop in [`DataMem.sv` lines 17–19](../5-9-cpu/DataMem.sv#L17-L19), which clears memory with `for (int i = 0; i < 128; i++) mem[i] <= 32'd0;`.
+- With `-O0`, that bug goes away, but Verilator 5.020 rejects `5-9-cpu` with `BLKLOOPINIT` ("Delayed assignment to array inside for loops"). The cause is the reset loop in [`DataMem.sv` lines 17–19](../5-9-cpu/DataMem.sv#L17-L19), which clears memory with `for (int i = 0; i < 128; i++) mem[i] <= 32'd0;`. In Verilator's terms, a "delayed assignment" is a non-blocking assignment (`<=`), because its update is deferred to the NBA region. A blocking assignment (`=`) in the same loop would be accepted. With default optimization, Verilator unrolls the loop into separate assignments first, so the limitation does not show. The RTL itself is fine: `<=` is the correct style in a clocked `always` block.
 
 ## Simulation (`sim.sh`)
 
