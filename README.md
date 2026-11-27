@@ -2,6 +2,8 @@
 
 **English** | [한국어](README.ko.md)
 
+[![RTL CI](https://github.com/Minchan6847/SAM_Digital_Circuit_Design/actions/workflows/rtl-ci.yml/badge.svg)](https://github.com/Minchan6847/SAM_Digital_Circuit_Design/actions/workflows/rtl-ci.yml)
+
 Exercises from the online course "Digital circuit design in practice: designing digital IP for computer architecture and SoC protocols" (삼코치).
 
 RTL design and verification of the core digital IP of a small computer system: the memory hierarchy (cache, SRAM, DRAM), storage data integrity (CRC, ECC), a five-stage pipelined CPU, and SoC protocols (FIFO, APB). Each module is designed, simulated, synthesized and documented.
@@ -48,6 +50,12 @@ RTL design and verification of the core digital IP of a small computer system: t
 | [6-3-apb_regs](6-3-apb_regs) | Register block that works as an AMBA APB slave. Decodes read and write addresses separately to protect read-only registers, and answers reserved, unaligned and read-only writes with `PSLVERR`. |
 
 > **From synchronous to asynchronous:** 6-1 covers the basic FIFO structure inside one clock. 6-2 splits the same structure across two clock domains and solves the resulting CDC problem with Gray code and synchronizers.
+
+---
+
+## Continuous integration
+
+Whenever a push to `main` or a pull request changes RTL or CI files, GitHub Actions runs each project's testbench with Verilator and synthesizes its RTL with Yosys (synthesizability, `check -assert`, latch check). See [.github/CI.md](.github/CI.md) for what is checked and how to add a project.
 
 ---
 
