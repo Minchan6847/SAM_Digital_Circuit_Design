@@ -1,0 +1,61 @@
+name: RTL CI
+
+on:
+  push:
+    branches: [main]
+    paths: ['**/*.v', '**/*.sv', '.github/**']
+  pull_request:
+    paths: ['**/*.v', '**/*.sv', '.github/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  # OSS CAD Suite is a nightly build (Verilator master, Yosys main, yosys-slang).
+  # Pin a dated release so results do not change from day to day.
+  OSS_CAD_SUITE_VERSION: '2026-11-26'
+
+jobs:
+  rtl:
+    name: ${{ matrix.dir }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { dir: 5-3-Cache,                 tb: tb_cache,                 expect: '\$finish',     synth: cache }
+          - { dir: 5-4-TPSRAM_DPSRAM,         tb: tb_tpsram,                expect: '\$finish',     synth: 'tpsram dpsram' }
+          - { dir: 5-6-DDR_Controller,        tb: tb_ddr_ctrl,              expect: '\$finish',     synth: ddr_ctrl }
+          - { dir: 5-7-CRC_16_CCITT_Parallel, tb: tb_CRC_16_CCITT_Parallel, expect: 'Please: 5787', synth: CRC_16_CCITT_Parallel }
+          - { dir: 5-8-Hamming_decoder,       tb: tb_Hamming_decoder,       expect: '^PASS:',       synth: Hamming_decoder }
+          - { dir: 5-9-cpu,                   tb: tb_cpu,                   expect: '^PASS:',       synth: cpu,              keep: keep }
+          - { dir: 5-10-cpu_hazard_hedge,     tb: tb_cpu_hazard_hedge,      expect: '^PASS:',       synth: cpu_hazard_hedge, keep: keep }
+          - { dir: 6-1-sync_fifo,             tb: tb_sync_fifo,             expect: '^PASS:',       synth: sync_fifo }
+          - { dir: 6-2-async_fifo,            tb: tb_async_fifo,            expect: '^PASS:',       synth: async_fifo }
+          - { dir: 6-3-apb_regs,              tb: tb_apb_regs,              expect: '^PASS:',       synth: apb_regs }
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install OSS CAD Suite
+        uses: YosysHQ/setup-oss-cad-suite@v4
+        with:
+          version: ${{ env.OSS_CAD_SUITE_VERSION }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Tool versions
+        run: |
+          verilator --version
+          yosys -V
+
+      - name: Simulate (Verilator)
+        env:
+          BUILD_DIR: ${{ runner.temp }}/sim
+        run: bash .github/scripts/sim.sh "${{ matrix.dir }}" "${{ matrix.tb }}" '${{ matrix.expect }}'
+
+      - name: Synthesize (Yosys + slang)
+        if: ${{ matrix.synth != '' }}
+        env:
+          BUILD_DIR: ${{ runner.temp }}/synth
+        run: bash .github/scripts/synth.sh "${{ matrix.dir }}" "${{ matrix.synth }}" "${{ matrix.keep }}"

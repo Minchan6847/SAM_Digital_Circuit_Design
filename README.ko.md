@@ -2,6 +2,8 @@
 
 [English](README.md) | **한국어**
 
+[![RTL CI](https://github.com/Minchan6847/SAM_Digital_Circuit_Design/actions/workflows/rtl-ci.yml/badge.svg)](https://github.com/Minchan6847/SAM_Digital_Circuit_Design/actions/workflows/rtl-ci.yml)
+
 [삼코치] 디지털 회로설계 실무 : Computer Architecture 와 SoC 프로토콜 Digital IP 설계하기 - 실습
 
 Computer Architecture와 SoC 프로토콜의 핵심 Digital IP들을 직접 RTL로 설계하고 검증한 실습 모음입니다. 메모리 계층(캐시·SRAM·DRAM)과 저장장치 데이터 무결성(CRC·ECC), 5단계 파이프라인 CPU, 그리고 SoC 프로토콜(FIFO·APB)까지, 각 모듈을 설계·시뮬레이션·합성하고 문서로 정리했습니다.
@@ -48,6 +50,12 @@ Computer Architecture와 SoC 프로토콜의 핵심 Digital IP들을 직접 RTL�
 | [6-3-apb_regs](6-3-apb_regs) | AMBA APB slave로 동작하는 register block. read/write address를 분리 decode해 read-only register를 보호하고, reserved·unaligned·read-only write를 `PSLVERR`로 응답. |
 
 > **동기 → 비동기 흐름:** 6-1은 하나의 clock 안에서 FIFO의 기본 구조를 다루고, 6-2는 같은 구조를 두 clock domain으로 나누면서 생기는 CDC 문제를 Gray code와 synchronizer로 해결합니다.
+
+---
+
+## CI (자동 검증)
+
+`main`에 push하거나 PR을 올릴 때 RTL이나 CI 파일이 바뀌었으면 GitHub Actions가 프로젝트마다 테스트벤치를 Verilator로 실행하고, RTL을 Yosys로 합성해 합성 가능 여부·`check -assert`·래치를 검사합니다. 검사 항목과 새 프로젝트 추가 방법은 [.github/CI.ko.md](.github/CI.ko.md)에 정리되어 있습니다.
 
 ---
 
