@@ -1,46 +1,58 @@
 # SAM_Digital_Circuit_Design
 
-[삼코치] 디지털 회로설계 실무 : Computer Architecture 와 SoC 프로토콜 Digital IP 설계하기 - 실습
+**English** | [한국어](README.ko.md)
 
-Computer Architecture와 SoC 프로토콜의 핵심 Digital IP들을 직접 RTL로 설계하고 검증한 실습 모음입니다. 메모리 계층(캐시·SRAM·DRAM)과 저장장치 데이터 무결성(CRC·ECC)부터 5단계 파이프라인 CPU까지, 각 모듈을 설계·시뮬레이션·합성하고 문서로 정리했습니다.
+Exercises from the online course "Digital circuit design in practice: designing digital IP for computer architecture and SoC protocols" (삼코치).
+
+RTL design and verification of the core digital IP of a small computer system: the memory hierarchy (cache, SRAM, DRAM), storage data integrity (CRC, ECC), a five-stage pipelined CPU, and SoC protocols (FIFO, APB). Each module is designed, simulated, synthesized and documented.
 
 - **Tool:** Quartus-lite-20.1.0.711-windows
-- 각 폴더의 `README.md`에 동작 원리, 블록/상태 다이어그램, 파형, 검증 결과가 정리되어 있습니다.
+- The `README.md` in each folder explains how the module works, with block and state diagrams, waveforms and verification results. Those folder documents are written in Korean.
 
 ---
 
 ## Projects
 
-### 메모리 계층 (Memory Hierarchy)
+### Memory hierarchy
 
-| 프로젝트 | 설명 |
+| Project | Description |
 |---|---|
-| [5-3-Cache](5-3-Cache) | Direct-mapped write-back 캐시. `req`/`ack` 핸드셰이크로 가변 지연을 처리하고, hit/miss·write-back·open-page 동작을 구현. |
-| [5-4-TPSRAM_DPSRAM](5-4-TPSRAM_DPSRAM) | Two-port(1R1W)·Dual-port(2RW) SRAM 모델. 포트 구성 차이와 셀(6T→8T)·주변 회로 비용까지 비교. |
-| [5-6-DDR_Controller](5-6-DDR_Controller) | DDR4-style DRAM 컨트롤러. FSM(ACT→WR/RD→PRE), 타이밍 파라미터, DQS 스트로브, BL8 버스트, open-page 정책 구현. |
+| [5-3-Cache](5-3-Cache) | Direct-mapped write-back cache. Handles variable latency with a `req`/`ack` handshake and implements hit and miss, write-back and open-page behavior. |
+| [5-4-TPSRAM_DPSRAM](5-4-TPSRAM_DPSRAM) | Two-port (1R1W) and dual-port (2RW) SRAM models. Compares the port configurations and the cost in cells (6T to 8T) and peripheral circuits. |
+| [5-6-DDR_Controller](5-6-DDR_Controller) | DDR4-style DRAM controller. State machine (ACT, WR/RD, PRE), timing parameters, DQS strobe, BL8 burst and an open-page policy. |
 
-### 데이터 무결성 (Data Integrity — NAND)
+### Data integrity (NAND)
 
-| 프로젝트 | 설명 |
+| Project | Description |
 |---|---|
-| [5-7-CRC_16_CCITT_Parallel](5-7-CRC_16_CCITT_Parallel) | CRC-16-CCITT byte-parallel 생성기. 오류 **검출**용. 손계산·비트루프·LUT·직렬 LFSR·병렬 unroll 5가지 구현 비교 포함. |
-| [5-8-Hamming_decoder](5-8-Hamming_decoder) | Hamming (21,16) SEC 인코더/디코더. 오류 **정정**용 ECC. syndrome으로 오류 위치를 찾아 단일 비트 정정. |
+| [5-7-CRC_16_CCITT_Parallel](5-7-CRC_16_CCITT_Parallel) | Byte-parallel CRC-16-CCITT generator, for error **detection**. Includes a comparison of five implementations: hand calculation, bit loop, LUT, serial LFSR and parallel unroll. |
+| [5-8-Hamming_decoder](5-8-Hamming_decoder) | Hamming (21,16) SEC encoder and decoder, an ECC for error **correction**. Finds the error position from the syndrome and corrects a single bit. |
 
-> **검출 → 정정 흐름:** CRC(5-7)는 오류가 있는지 *검출*만 하고, Hamming/ECC(5-8)는 한발 더 나아가 오류를 *정정*합니다. NAND flash 데이터 무결성의 두 축을 이룹니다.
+> **From detection to correction:** CRC (5-7) only *detects* that an error exists. Hamming ECC (5-8) goes one step further and *corrects* it. Together they are the two halves of NAND flash data integrity.
 
-### 프로세서 (Processor)
+### Processor
 
-| 프로젝트 | 설명 |
+| Project | Description |
 |---|---|
-| [5-9-cpu](5-9-cpu) | 5단계 파이프라인 MIPS CPU (hazard 미처리). IF→ID→EX→MEM→WB를 파이프라인 레지스터로 분리, 분기는 MEM에서 해결. RAW 의존 간격 4칸과 분기 뒤 NOP 3개를 프로그램이 직접 확보해야 함. |
-| [5-10-cpu_hazard_hedge](5-10-cpu_hazard_hedge) | 위 CPU에 hazard 처리를 추가한 버전. Forwarding unit + Hazard detection(load-use stall) + IF flush를 구현하고, 분기를 ID로 앞당겨 페널티를 3에서 1로 축소. `or`/`slt`/`bne`/`j` 명령 추가. |
+| [5-9-cpu](5-9-cpu) | Five-stage pipelined MIPS CPU without hazard handling. IF, ID, EX, MEM and WB are separated by pipeline registers, and branches resolve in MEM. The program itself has to keep RAW-dependent instructions four slots apart and place three NOPs after each branch. |
+| [5-10-cpu_hazard_hedge](5-10-cpu_hazard_hedge) | The same CPU with hazard handling. Adds a forwarding unit, hazard detection (load-use stall) and IF flush, and moves branch resolution to ID so the penalty drops from 3 to 1. Adds the `or`, `slt`, `bne` and `j` instructions. |
 
-> **미처리 → 처리 흐름:** 5-9는 hazard를 소프트웨어가 회피하고(의존 명령 4칸 간격, NOP 패딩), 5-10은 하드웨어가 forwarding·stall·flush로 직접 해결합니다. 두 버전을 나란히 보면 각 hazard 로직이 어떤 제약을 없애주는지 드러납니다.
+> **From unhandled to handled:** in 5-9 the software avoids hazards (four-slot spacing between dependent instructions, NOP padding). In 5-10 the hardware resolves them with forwarding, stall and flush. Side by side, the two versions show which restriction each piece of hazard logic removes.
+
+### SoC protocols (FIFO, AMBA)
+
+| Project | Description |
+|---|---|
+| [6-1-sync_fifo](6-1-sync_fifo) | Single-clock synchronous FIFO. Counter-based occupancy tracking and circular pointers. Depth, width and the almost-full and almost-empty thresholds are parameters. |
+| [6-2-async_fifo](6-2-async_fifo) | Asynchronous FIFO that passes data between two independent clocks. CDC with Gray code pointers and two-flop synchronizers, async-assert and sync-deassert reset in each domain, and first-word fall-through output. |
+| [6-3-apb_regs](6-3-apb_regs) | Register block that works as an AMBA APB slave. Decodes read and write addresses separately to protect read-only registers, and answers reserved, unaligned and read-only writes with `PSLVERR`. |
+
+> **From synchronous to asynchronous:** 6-1 covers the basic FIFO structure inside one clock. 6-2 splits the same structure across two clock domains and solves the resulting CDC problem with Gray code and synchronizers.
 
 ---
 
-## 공통 사항
+## Common notes
 
-- 각 프로젝트는 RTL 소스(`.v`/`.sv`), 테스트벤치, 합성 네트리스트 schematic, RTL 시뮬레이션 파형으로 구성됩니다.
-- 문서의 다이어그램은 Mermaid로 작성되어 GitHub에서 바로 렌더링됩니다.
-- 폴더 번호는 강의 커리큘럼 순서를 따릅니다.
+- Each project consists of RTL sources (`.v`, `.sv`), a testbench, the synthesized netlist schematic and RTL simulation waveforms.
+- Diagrams in the documents are written in Mermaid and render directly on GitHub.
+- Folder numbers follow the order of the course curriculum.
